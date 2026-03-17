@@ -362,6 +362,12 @@
 
 							<ControlTemplate x:Key="SliderThumbHorizontalLarge" TargetType="{x:Type Thumb}">
 								<Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+									<Rectangle Height="{DynamicResource BracketHeight}"
+											   VerticalAlignment="Top"
+											   Fill="{TemplateBinding Background}"/>
+									<Rectangle Height="{DynamicResource BracketHeight}"
+											   VerticalAlignment="Bottom"
+											   Fill="{TemplateBinding Background}"/>
 									<Rectangle Width="11" Height="{DynamicResource ThumbHeight}"
 											   Margin="2"
 											   Fill="{TemplateBinding Foreground}"/>
@@ -370,6 +376,19 @@
 
 							<ControlTemplate x:Key="SliderThumbHorizontalSmall" TargetType="{x:Type Thumb}">
 								<Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+									<Path Width="22" Height="22"
+										  Fill="{TemplateBinding Background}">
+										<Path.Data>
+											<CombinedGeometry GeometryCombineMode="Exclude">
+												<CombinedGeometry.Geometry1>
+													<EllipseGeometry Center="11,11" RadiusX="11" RadiusY="11"/>
+												</CombinedGeometry.Geometry1>
+												<CombinedGeometry.Geometry2>
+													<PathGeometry Figures="M 0,0 L 22,22 22,0 0,22 Z"/>
+												</CombinedGeometry.Geometry2>
+											</CombinedGeometry>
+										</Path.Data>
+									</Path>
 									<Ellipse Width="20" Height="20"
 											 StrokeThickness="2.5"
 											 Stroke="Transparent"
@@ -409,6 +428,9 @@
 						</Border>
 
 						<ControlTemplate.Triggers>
+							<DataTrigger Binding="{Binding IsUnison}" Value="True">
+								<Setter Property="Background" TargetName="thumb" Value="{StaticResource Slider.Background.Bracket}"/>
+							</DataTrigger>
 							<DataTrigger Binding="{Binding Settings.UsesLargeElements}" Value="False">
 								<Setter TargetName="thumb" Property="Template" Value="{StaticResource SliderThumbHorizontalSmall}"/>
 							</DataTrigger>

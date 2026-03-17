@@ -107,7 +107,7 @@ public class SettingsCore : BindableBase
 		get => _enablesUnison;
 		set => SetProperty(ref _enablesUnison, value);
 	}
-	private bool _enablesUnison;
+	private bool _enablesUnison = true;
 
 	/// <summary>
 	/// Whether to enable changing adjustable range
@@ -129,7 +129,7 @@ public class SettingsCore : BindableBase
 		get => _enablesContrast;
 		set => SetProperty(ref _enablesContrast, value);
 	}
-	private bool _enablesContrast;
+	private bool _enablesContrast = true;
 
 	/// <summary>
 	/// Monitor customizations by user

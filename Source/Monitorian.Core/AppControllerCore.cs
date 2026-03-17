@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -208,6 +208,9 @@ public class AppControllerCore
 
 	protected virtual async void OnSettingsInitiated()
 	{
+		Settings.EnablesUnison = true;
+		Settings.EnablesContrast = true;
+
 		if (Settings.UsesAccentColor)
 			WindowPainter.AttachAccentColors();
 
@@ -544,7 +547,7 @@ public class AppControllerCore
 			&& m.IsValid)
 		{
 			name = m.Name;
-			isUnison = m.IsUnison && Settings.EnablesUnison;
+			isUnison = true;
 			lowest = m.Lowest;
 			highest = m.Highest;
 			return true;

@@ -79,7 +79,7 @@ public class MonitorViewModel : ViewModelBase
 				SaveCustomization();
 		}
 	}
-	private bool _isUnison;
+	private bool _isUnison = true;
 
 	/// <summary>
 	/// Whether the range of brightness is changing
@@ -271,7 +271,7 @@ public class MonitorViewModel : ViewModelBase
 				UpdateContrast();
 		}
 	}
-	private bool _isContrastChanging = false;
+	private bool _isContrastChanging = true;
 
 	public int Contrast
 	{
