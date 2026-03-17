@@ -1,4 +1,4 @@
-﻿<Window x:Class="Monitorian.Core.Views.MainWindow"
+<Window x:Class="Monitorian.Core.Views.MainWindow"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -718,21 +718,23 @@
 								</TextBlock>
 							</Label>
 
-							<!-- Contrast -->
-							<controls:EnhancedSlider Grid.Column="4"
-													 x:Name="ContrastSlider"
-													 Width="100" Margin="8,0,4,0" VerticalAlignment="Stretch"
-													 Style="{StaticResource SubSliderHorizontal}"
-													 Minimum="0" Maximum="100"
-													 SmallChange="1"
-													 Value="{Binding Contrast, Mode=TwoWay, Delay=50}"
-													 DefersUpdateSource="{Binding Settings.DefersChange, Mode=OneWay}"
-													 Visibility="{Binding IsContrastChanging, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
-								<i:Interaction.Behaviors>
-									<behaviors:ItemSliderBehavior/>
-									<behaviors:MouseHorizontalWheelBehavior/>
-								</i:Interaction.Behaviors>
-							</controls:EnhancedSlider>
+						<!-- Contrast -->
+						<controls:ContrastUnisonSlider Grid.Column="4"
+												 x:Name="ContrastSlider"
+												 Width="100" Margin="8,0,4,0" VerticalAlignment="Stretch"
+												 Style="{StaticResource SubSliderHorizontal}"
+												 Minimum="0" Maximum="100"
+												 SmallChange="1"
+												 Value="{Binding Contrast, Mode=TwoWay, Delay=50}"
+												 DefersUpdateSource="{Binding Settings.DefersChange, Mode=OneWay}"
+												 IsUnison="{Binding IsUnison, Mode=OneWay}"
+												 ValueUnison="{Binding ContrastUnison, Mode=OneWay}"
+												 Visibility="{Binding IsContrastChanging, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+							<i:Interaction.Behaviors>
+								<behaviors:ItemSliderBehavior/>
+								<behaviors:MouseHorizontalWheelBehavior/>
+							</i:Interaction.Behaviors>
+						</controls:ContrastUnisonSlider>
 
 							<Label Grid.Column="5"
 								   Width="26" Margin="0,0,4,0"

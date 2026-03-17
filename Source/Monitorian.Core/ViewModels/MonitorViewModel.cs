@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -288,6 +288,8 @@ public class MonitorViewModel : ViewModelBase
 		}
 	}
 
+	public int ContrastUnison => Contrast;
+
 	public bool UpdateContrast()
 	{
 		AccessResult result;
@@ -300,6 +302,7 @@ public class MonitorViewModel : ViewModelBase
 		{
 			case AccessStatus.Succeeded:
 				ContrastUpdatedTime = DateTimeOffset.Now;
+				OnPropertyChanged(nameof(ContrastUnison));
 				OnPropertyChanged(nameof(Contrast));
 				OnSucceeded();
 				return true;
@@ -358,6 +361,7 @@ public class MonitorViewModel : ViewModelBase
 		{
 			case AccessStatus.Succeeded:
 				ContrastUpdatedTime = DateTimeOffset.Now;
+				OnPropertyChanged(nameof(ContrastUnison));
 				OnPropertyChanged(nameof(Contrast));
 				OnSucceeded();
 				return true;
