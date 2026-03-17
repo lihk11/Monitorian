@@ -250,9 +250,9 @@ public class AppControllerCore
 				ViewManager.InvertsScrollDirection = Settings.InvertsScrollDirection;
 				break;
 
-			case nameof(Settings.EnablesUnison) when !Settings.EnablesUnison:
+			case nameof(Settings.EnablesUnison):
 				foreach (var m in Monitors)
-					m.IsUnison = false;
+					m.IsUnison = Settings.EnablesUnison;
 
 				break;
 
@@ -583,6 +583,54 @@ public class AppControllerCore
 			}
 			_isUnisonWorkable = true;
 		});
+	}
+
+	#endregion
+
+	#region Unison Sync
+
+	private bool _isSyncingBrightness;
+
+	internal void SyncBrightnessUnison(MonitorViewModel source, int value)
+	{
+		if (_isSyncingBrightness || !Settings.EnablesUnison)
+			return;
+
+		_isSyncingBrightness = true;
+		try
+		{
+			foreach (var m in Monitors.ToArray())
+			{
+				if (!ReferenceEquals(m, source) && m.IsTarget)
+					m.SetBrightness(value);
+			}
+		}
+		finally
+		{
+			_isSyncingBrightness = false;
+		}
+	}
+
+	private bool _isSyncingContrast;
+
+	internal void SyncContrastUnison(MonitorViewModel source, int value)
+	{
+		if (_isSyncingContrast || !Settings.EnablesUnison)
+			return;
+
+		_isSyncingContrast = true;
+		try
+		{
+			foreach (var m in Monitors.ToArray())
+			{
+				if (!ReferenceEquals(m, source) && m.IsTarget && m.IsContrastSupported)
+					m.SetContrast(value);
+			}
+		}
+		finally
+		{
+			_isSyncingContrast = false;
+		}
 	}
 
 	#endregion

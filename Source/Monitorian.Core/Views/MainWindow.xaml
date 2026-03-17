@@ -614,9 +614,96 @@
 							 IsPulsing="{Binding IsScanning, Mode=OneWay}"
 							 Visibility="{Binding IsMonitorsEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}"/>
 
-		<!-- Monitors-->
+		<!-- Merged unison view (visible when EnablesUnison is on) -->
+		<Grid Visibility="{Binding Settings.EnablesUnison, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+			<Grid DataContext="{Binding MonitorsView/}"
+				  Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverterKey}}">
+				<Grid Margin="0,4,0,8" Background="Transparent">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+
+					<!-- Brightness -->
+					<Grid Grid.Row="0"
+						  Height="{DynamicResource SliderHeight}"
+						  Margin="0,0,12,0"
+						  Visibility="{Binding IsControllable, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+
+						<controls:CompoundSlider Grid.Column="0"
+												 Margin="12,0,4,0" VerticalAlignment="Stretch"
+												 Style="{StaticResource MainSliderHorizontal}"
+												 Minimum="0" Maximum="100"
+												 SmallChange="1"
+												 Value="{Binding Brightness, Mode=TwoWay, Delay=50}"
+												 DefersUpdateSource="{Binding Settings.DefersChange, Mode=OneWay}"
+												 IsShadowVisible="{Binding Settings.ShowsAdjusted, Mode=OneWay}"
+												 ValueShadow="{Binding BrightnessSystemAdjusted, Mode=OneWay}"
+												 IsUnison="True"
+												 ValueUnison="{Binding BrightnessUnison, Mode=OneWay}"
+												 MinimumSelectionRange="10"
+												 SelectionStart="{Binding RangeLowest, Mode=TwoWay, Delay=50}"
+												 SelectionEnd="{Binding RangeHighest, Mode=TwoWay, Delay=50}">
+							<i:Interaction.Behaviors>
+								<behaviors:MouseHorizontalWheelBehavior/>
+							</i:Interaction.Behaviors>
+						</controls:CompoundSlider>
+
+						<Label Grid.Column="1"
+							   Width="26" Margin="0,0,4,0"
+							   Style="{StaticResource NumberLabelStyle}"
+							   FontSize="16"
+							   Content="{Binding Brightness, Mode=OneWay}">
+							<i:Interaction.Triggers>
+								<i:EventTrigger EventName="MouseDown">
+									<i:CallMethodAction TargetObject="{Binding}" MethodName="IncrementBrightness"/>
+								</i:EventTrigger>
+							</i:Interaction.Triggers>
+						</Label>
+					</Grid>
+
+					<!-- Contrast -->
+					<Grid Grid.Row="1"
+						  Height="{DynamicResource SliderHeight}"
+						  Margin="0,0,12,0"
+						  Visibility="{Binding IsContrastSupported, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+
+						<controls:ContrastUnisonSlider Grid.Column="0"
+												 Margin="12,0,4,0" VerticalAlignment="Stretch"
+												 Style="{StaticResource SubSliderHorizontal}"
+												 Minimum="0" Maximum="100"
+												 SmallChange="1"
+												 Value="{Binding Contrast, Mode=TwoWay, Delay=50}"
+												 DefersUpdateSource="{Binding Settings.DefersChange, Mode=OneWay}"
+												 IsUnison="True"
+												 ValueUnison="{Binding ContrastUnison, Mode=OneWay}">
+							<i:Interaction.Behaviors>
+								<behaviors:MouseHorizontalWheelBehavior/>
+							</i:Interaction.Behaviors>
+						</controls:ContrastUnisonSlider>
+
+						<Label Grid.Column="1"
+							   Width="26" Margin="0,0,4,0"
+							   Style="{StaticResource NumberLabelStyle}"
+							   FontSize="16"
+							   Content="{Binding Contrast, Mode=OneWay}"/>
+					</Grid>
+				</Grid>
+			</Grid>
+		</Grid>
+
+		<!-- Individual monitors (visible when EnablesUnison is off) -->
 		<ListView ItemsSource="{Binding MonitorsView}"
-				  SelectionMode="Single">
+				  SelectionMode="Single"
+				  Visibility="{Binding Settings.EnablesUnison, Mode=OneWay, Converter={StaticResource BooleanToVisibilityTurnConverterKey}, ConverterParameter=True}">
 			<ListView.Template>
 				<ControlTemplate TargetType="{x:Type ListView}">
 					<Border BorderThickness="0">
@@ -655,12 +742,6 @@
 							<StackPanel Grid.Column="1"
 										VerticalAlignment="Top"
 										Orientation="Horizontal">
-								<!-- Unison -->
-								<controls:IconButton Style="{StaticResource UnisonButtonStyle}"
-													 ToolTip="{x:Static properties:Resources.ChangeUnison}"
-													 Visibility="{Binding Settings.EnablesUnison, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}"
-													 IsChecked="{Binding IsUnison, Mode=TwoWay}"/>
-
 								<!-- Range -->
 								<controls:IconButton Style="{StaticResource RangeButtonStyle}"
 													 ToolTip="{x:Static properties:Resources.ChangeRange}"

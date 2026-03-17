@@ -137,6 +137,8 @@ public class MonitorViewModel : ViewModelBase
 
 			if (IsSelected)
 				_controller.SelectedMonitor = this;
+
+			_controller.SyncBrightnessUnison(this, value);
 		}
 	}
 
@@ -285,6 +287,8 @@ public class MonitorViewModel : ViewModelBase
 
 			if (IsSelected)
 				_controller.SelectedMonitor = this;
+
+			_controller.SyncContrastUnison(this, value);
 		}
 	}
 
