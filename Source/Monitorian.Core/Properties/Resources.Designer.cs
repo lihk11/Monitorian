@@ -124,6 +124,15 @@ namespace Monitorian.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sync brightness and contrast.
+        /// </summary>
+        public static string EnableBrightnessContrastSync {
+            get {
+                return ResourceManager.GetString("EnableBrightnessContrastSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enable changing contrast.
         /// </summary>
         public static string EnableContrast {
@@ -142,7 +151,7 @@ namespace Monitorian.Core.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable changing in unison.
+        ///   Looks up a localized string similar to Sync monitors.
         /// </summary>
         public static string EnableUnison {
             get {

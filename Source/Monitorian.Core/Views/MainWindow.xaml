@@ -669,8 +669,21 @@
 					<!-- Contrast -->
 					<Grid Grid.Row="1"
 						  Height="{DynamicResource SliderHeight}"
-						  Margin="0,0,12,0"
-						  Visibility="{Binding IsContrastSupported, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+						  Margin="0,0,12,0">
+						<Grid.Style>
+							<Style TargetType="Grid">
+								<Setter Property="Visibility" Value="Collapsed"/>
+								<Style.Triggers>
+									<MultiDataTrigger>
+										<MultiDataTrigger.Conditions>
+											<Condition Binding="{Binding IsContrastSupported, Mode=OneWay}" Value="True"/>
+											<Condition Binding="{Binding Settings.EnablesBrightnessContrastSync, Mode=OneWay}" Value="False"/>
+										</MultiDataTrigger.Conditions>
+										<Setter Property="Visibility" Value="Visible"/>
+									</MultiDataTrigger>
+								</Style.Triggers>
+							</Style>
+						</Grid.Style>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
 							<ColumnDefinition Width="Auto"/>
@@ -696,8 +709,8 @@
 							   FontSize="16"
 							   Content="{Binding Contrast, Mode=OneWay}"/>
 					</Grid>
-				</Grid>
-			</Grid>
+					</Grid>
+					</Grid>
 		</Grid>
 
 		<!-- Individual monitors (visible when EnablesUnison is off) -->
@@ -825,14 +838,26 @@
 						<controls:ContrastUnisonSlider Grid.Column="4"
 												 x:Name="ContrastSlider"
 												 Width="100" Margin="8,0,4,0" VerticalAlignment="Stretch"
-												 Style="{StaticResource SubSliderHorizontal}"
 												 Minimum="0" Maximum="100"
 												 SmallChange="1"
 												 Value="{Binding Contrast, Mode=TwoWay, Delay=50}"
 												 DefersUpdateSource="{Binding Settings.DefersChange, Mode=OneWay}"
 												 IsUnison="{Binding IsUnison, Mode=OneWay}"
-												 ValueUnison="{Binding ContrastUnison, Mode=OneWay}"
-												 Visibility="{Binding IsContrastChanging, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}">
+												 ValueUnison="{Binding ContrastUnison, Mode=OneWay}">
+							<controls:ContrastUnisonSlider.Style>
+								<Style TargetType="controls:ContrastUnisonSlider" BasedOn="{StaticResource SubSliderHorizontal}">
+									<Setter Property="Visibility" Value="Collapsed"/>
+									<Style.Triggers>
+										<MultiDataTrigger>
+											<MultiDataTrigger.Conditions>
+												<Condition Binding="{Binding IsContrastChanging, Mode=OneWay}" Value="True"/>
+												<Condition Binding="{Binding Settings.EnablesBrightnessContrastSync, Mode=OneWay}" Value="False"/>
+											</MultiDataTrigger.Conditions>
+											<Setter Property="Visibility" Value="Visible"/>
+										</MultiDataTrigger>
+									</Style.Triggers>
+								</Style>
+							</controls:ContrastUnisonSlider.Style>
 							<i:Interaction.Behaviors>
 								<behaviors:ItemSliderBehavior/>
 								<behaviors:MouseHorizontalWheelBehavior/>
@@ -841,10 +866,23 @@
 
 							<Label Grid.Column="5"
 								   Width="26" Margin="0,0,4,0"
-								   Style="{StaticResource NumberLabelStyle}"
 								   FontSize="16"
-								   Content="{Binding Contrast, Mode=OneWay}"
-								   Visibility="{Binding IsContrastChanging, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverterKey}}"/>
+								   Content="{Binding Contrast, Mode=OneWay}">
+								<Label.Style>
+									<Style TargetType="Label" BasedOn="{StaticResource NumberLabelStyle}">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding IsContrastChanging, Mode=OneWay}" Value="True"/>
+													<Condition Binding="{Binding Settings.EnablesBrightnessContrastSync, Mode=OneWay}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Label.Style>
+							</Label>
 						</Grid>
 
 						<!-- Message -->

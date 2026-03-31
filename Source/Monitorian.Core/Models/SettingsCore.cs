@@ -132,6 +132,17 @@ public class SettingsCore : BindableBase
 	private bool _enablesContrast = true;
 
 	/// <summary>
+	/// Whether to sync brightness and contrast (use same value, share one slider)
+	/// </summary>
+	[DataMember]
+	public bool EnablesBrightnessContrastSync
+	{
+		get => _enablesBrightnessContrastSync;
+		set => SetProperty(ref _enablesBrightnessContrastSync, value);
+	}
+	private bool _enablesBrightnessContrastSync = true;
+
+	/// <summary>
 	/// Monitor customizations by user
 	/// </summary>
 	[DataMember]

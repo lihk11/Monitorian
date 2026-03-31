@@ -138,6 +138,9 @@
   <data name="DeferChange" xml:space="preserve">
     <value>Defer change until stopped</value>
   </data>
+  <data name="EnableBrightnessContrastSync" xml:space="preserve">
+    <value>Sync brightness and contrast</value>
+  </data>
   <data name="EnableContrast" xml:space="preserve">
     <value>Enable changing contrast</value>
   </data>
@@ -145,7 +148,7 @@
     <value>Enable changing adjustable range</value>
   </data>
   <data name="EnableUnison" xml:space="preserve">
-    <value>Enable changing in unison</value>
+    <value>Sync monitors</value>
   </data>
   <data name="InvertScrollDirection" xml:space="preserve">
     <value>Invert scroll direction</value>

@@ -268,6 +268,20 @@ public class AppControllerCore
 
 				break;
 
+			case nameof(Settings.EnablesBrightnessContrastSync):
+				if (Settings.EnablesBrightnessContrastSync)
+				{
+					foreach (var m in Monitors.Where(x => x.IsTarget && x.IsContrastSupported))
+						Task.Run(() => m.SetContrast(m.Brightness));
+				}
+				else
+				{
+					foreach (var m in Monitors.Where(x => x.IsTarget && x.IsContrastSupported))
+						Task.Run(() => m.UpdateContrast());
+				}
+
+				break;
+
 			case nameof(Settings.RecordsOperationLog):
 				if (Settings.RecordsOperationLog)
 					await OperationRecorder.EnableAsync("Enabled");
@@ -405,6 +419,8 @@ public class AppControllerCore
 								if (x.UpdateBrightness())
 								{
 									x.IsTarget = true;
+									if (x.IsContrastSupported)
+										x.UpdateContrast();
 								}
 								return x.IsControllable;
 							});

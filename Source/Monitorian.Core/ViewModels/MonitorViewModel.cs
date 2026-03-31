@@ -134,6 +134,7 @@ public class MonitorViewModel : ViewModelBase
 				return;
 
 			SetBrightness(value, false);
+			SyncContrastToBrightness();
 
 			if (IsSelected)
 				_controller.SelectedMonitor = this;
@@ -202,6 +203,7 @@ public class MonitorViewModel : ViewModelBase
 		int brightness = RangeLowest + (int)Math.Ceiling((count + 1) * size);
 
 		SetBrightness(brightness, isCycle);
+		SyncContrastToBrightness();
 	}
 
 	public void DecrementBrightness(int tickSize, bool isCycle = true)
@@ -214,9 +216,14 @@ public class MonitorViewModel : ViewModelBase
 		int brightness = RangeLowest + (int)Math.Floor((count - 1) * size);
 
 		SetBrightness(brightness, isCycle);
+		SyncContrastToBrightness();
 	}
 
-	public void SetBrightness(int brightness) => SetBrightness(brightness, false);
+	public void SetBrightness(int brightness)
+	{
+		SetBrightness(brightness, false);
+		SyncContrastToBrightness();
+	}
 
 	private bool SetBrightness(int brightness, bool isCycle)
 	{
@@ -257,6 +264,27 @@ public class MonitorViewModel : ViewModelBase
 	}
 
 	public DateTimeOffset BrightnessUpdatedTime { get; private set; }
+
+	private int _pendingContrastSync;
+
+	private void SyncContrastToBrightness()
+	{
+		if (!Settings.EnablesBrightnessContrastSync || !IsContrastSupported)
+			return;
+
+		var brightness = Brightness;
+		_pendingContrastSync = brightness;
+
+		Task.Run(async () =>
+		{
+			await Task.Delay(100);
+
+			if (_pendingContrastSync != brightness)
+				return;
+
+			SetContrast(brightness);
+		});
+	}
 
 	#endregion
 
