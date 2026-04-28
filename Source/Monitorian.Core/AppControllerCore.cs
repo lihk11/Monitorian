@@ -80,14 +80,19 @@ public class AppControllerCore
 		};
 
 		_current.MainWindow = new MainWindow(this);
-		_brightnessHotKeyTracker = new BrightnessHotKeyTracker(_current.MainWindow);
-		_brightnessHotKeyTracker.DecrementPressed += (_, _) => ReflectBrightnessKey(false);
-		_brightnessHotKeyTracker.IncrementPressed += (_, _) => ReflectBrightnessKey(true);
 
 		if (StartupAgent.IsWindowShowExpected())
 			_current.MainWindow.Show();
 
 		await ScanAsync();
+
+		// Register the global brightness hotkeys only after the initial scan has finished so
+		// that pressing them before any monitor is enumerated cannot dereference a null
+		// SelectedMonitor (which previously caused a NullReferenceException and could also
+		// disrupt the rest of the initialization, leaving the tray right-click menu broken).
+		_brightnessHotKeyTracker = new BrightnessHotKeyTracker(_current.MainWindow);
+		_brightnessHotKeyTracker.DecrementPressed += (_, _) => ReflectBrightnessKey(false);
+		_brightnessHotKeyTracker.IncrementPressed += (_, _) => ReflectBrightnessKey(true);
 
 		StartupAgent.HandleRequestAsync = HandleRequestAsync;
 
@@ -531,8 +536,7 @@ public class AppControllerCore
 
 	private void ReflectBrightnessKey(bool increments)
 	{
-		var monitor = Monitors.Prepend(SelectedMonitor)
-			.FirstOrDefault(x => x.IsTarget && x.IsControllable);
+		var monitor = FindControllableMonitor();
 		if (monitor is null)
 			return;
 
@@ -543,17 +547,35 @@ public class AppControllerCore
 			: SystemBrightnessKeyFactor;
 
 		ReflectBrightness(monitor, increments, tickSize);
+
+		// Show the main window only for the hotkey path so that the user can see the
+		// brightness change visually. The mouse-wheel path on the tray icon used to skip
+		// this on purpose, and lifting it up here keeps the existing mouse-wheel UX intact.
+		ShowMainWindow();
 	}
 
 	private void ReflectBrightness(bool increments, int tickSize)
 	{
-		var monitor = Monitors.Prepend(SelectedMonitor)
-			.FirstOrDefault(x => x.IsTarget && x.IsControllable);
+		var monitor = FindControllableMonitor();
 		if (monitor is null)
 			return;
 
 		EnsureUnisonWorkable(monitor);
 		ReflectBrightness(monitor, increments, tickSize);
+	}
+
+	private MonitorViewModel FindControllableMonitor()
+	{
+		// SelectedMonitor can be null right after startup (when no monitors are enumerated
+		// yet, or none of them matches the persisted SelectedDeviceInstanceId). Calling
+		// Monitors.Prepend(null) and then evaluating x.IsTarget on the first element used
+		// to throw NullReferenceException, so prefer the selected monitor only when it is
+		// actually a controllable target and otherwise fall back to the regular search.
+		var selected = SelectedMonitor;
+		if (selected is { IsTarget: true, IsControllable: true })
+			return selected;
+
+		return Monitors.FirstOrDefault(x => x.IsTarget && x.IsControllable);
 	}
 
 	private void ReflectBrightness(MonitorViewModel monitor, bool increments, int tickSize)
@@ -569,8 +591,6 @@ public class AppControllerCore
 		{
 			monitor.DecrementBrightness(tickSize, false);
 		}
-
-		ShowMainWindow();
 	}
 
 	protected internal MonitorViewModel SelectedMonitor

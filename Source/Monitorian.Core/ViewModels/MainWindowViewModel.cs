@@ -40,6 +40,19 @@ public class MainWindowViewModel : ViewModelBase
 				_monitorsView.LiveFilteringProperties.Add(nameof(MonitorViewModel.IsTarget));
 
 				((INotifyCollectionChanged)_monitorsView).CollectionChanged += OnCollectionChanged;
+
+				// The merged unison view in MainWindow.xaml binds its DataContext to
+				// "{Binding MonitorsView/}" (the trailing slash means CurrentItem) and uses
+				// ObjectToVisibilityConverter to collapse itself when CurrentItem is null.
+				// When the underlying collection is already populated by the time MonitorsView
+				// is first accessed (which is the typical case: the brightness hotkey path
+				// triggers visual-tree construction after ScanAsync has already finished
+				// adding monitors), no Add event will fire, so OnCollectionChanged has no
+				// chance to set up a current item. Likewise, applying SortDescriptions/Filter
+				// can leave CurrentItem at the "before first" position. Without an explicit
+				// initialization here, the unison view stays Collapsed and MainWindow shows
+				// up as an empty narrow/flat panel.
+				EnsureCurrentItem();
 			}
 			return _monitorsView;
 		}
@@ -55,21 +68,39 @@ public class MainWindowViewModel : ViewModelBase
 			case NotifyCollectionChangedAction.Remove:
 				OnPropertyChanged(nameof(IsMonitorsEmpty));
 
-				if (MonitorsView.CurrentItem is null)
-				{
-					// CollectionView.CurrentItem is automatically synchronized with SelectedItem
-					// when the target is an ItemsControl. However, this synchronization is not
-					// always fast enough to check if any item is currently selected.
-					if (!MonitorsView.Cast<MonitorViewModel>().Any(x => x.IsSelected))
-					{
-						var monitor = MonitorsView.Cast<MonitorViewModel>()
-							.FirstOrDefault(x => ReferenceEquals(x, _controller.SelectedMonitor));
-						if (monitor is not null)
-							monitor.IsSelected = true;
-					}
-				}
+				EnsureCurrentItem();
 				break;
 		}
+	}
+
+	private void EnsureCurrentItem()
+	{
+		if (_monitorsView is null || _monitorsView.IsEmpty)
+			return;
+
+		// If a monitor is already current and is selected, nothing to do.
+		if (_monitorsView.CurrentItem is MonitorViewModel { IsSelected: true })
+			return;
+
+		// Prefer the persisted selected monitor; otherwise fall back to whichever monitor is
+		// already marked as IsSelected; otherwise use the first monitor in the filtered/
+		// sorted view. Without this fallback, the unison view's CurrentItem stays null when
+		// SelectedDeviceInstanceId does not match any enumerated monitor (e.g. on a fresh
+		// install or after the user disconnected the previously selected display), and the
+		// merged unison Grid in MainWindow.xaml gets collapsed.
+		var monitor = _monitorsView.Cast<MonitorViewModel>()
+				.FirstOrDefault(x => ReferenceEquals(x, _controller.SelectedMonitor))
+			?? _monitorsView.Cast<MonitorViewModel>()
+				.FirstOrDefault(x => x.IsSelected)
+			?? _monitorsView.Cast<MonitorViewModel>().FirstOrDefault();
+		if (monitor is null)
+			return;
+
+		// Move the view's current item explicitly: just setting IsSelected=true on the
+		// MonitorViewModel does not propagate to ListCollectionView.CurrentItem when the
+		// ListView in the visual tree is collapsed (which it is whenever EnablesUnison is on).
+		_monitorsView.MoveCurrentTo(monitor);
+		monitor.IsSelected = true;
 	}
 
 	public bool IsMonitorsEmpty => MonitorsView.IsEmpty;

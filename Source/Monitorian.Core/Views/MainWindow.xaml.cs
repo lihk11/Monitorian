@@ -161,25 +161,30 @@ public partial class MainWindow : Window
 
 	public void ShowUnnoticed()
 	{
-		var width = this.Width;
-		var height = this.Height;
-		var sizeToContent = this.SizeToContent;
+		// The visual tree must be built at least once so that the CompoundSliders inside
+		// the ListView are instantiated and have their IsUnison/ValueUnison bindings
+		// propagated; CompoundSlider only subscribes to its static "Moved" event from the
+		// IsUnison PropertyChanged handler, which is what makes unison synchronization work.
+		// The previous implementation forced the window to 1x1 with SizeToContent.Manual to
+		// stay unnoticed, but in WPF that left the auto-size cache stuck at 1x1 in the
+		// hidden window: the next real Show() then briefly revealed an empty narrow/flat
+		// panel until the user interacted with it. Use Opacity=0 + ShowActivated=false
+		// instead so the window is invisible during this priming Show()/Hide() cycle and
+		// its Width/Height/SizeToContent state is left intact.
+		var oldOpacity = this.Opacity;
+		var oldShowActivated = this.ShowActivated;
 		try
 		{
-			// Set window size as small as possible to make it almost unnoticed.
-			this.Width = 1;
-			this.Height = 1;
-			this.SizeToContent = SizeToContent.Manual;
+			this.Opacity = 0;
+			this.ShowActivated = false;
 
 			base.Show();
 			this.Hide();
 		}
 		finally
 		{
-			// Restore window size.
-			this.Width = width;
-			this.Height = height;
-			this.SizeToContent = sizeToContent;
+			this.Opacity = oldOpacity;
+			this.ShowActivated = oldShowActivated;
 		}
 	}
 
