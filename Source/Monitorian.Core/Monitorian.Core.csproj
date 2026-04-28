@@ -147,6 +147,7 @@
     <Compile Include="Views\Input\Touchpad\TouchpadContact.cs" />
     <Compile Include="Views\Input\Touchpad\TouchpadHelper.cs" />
     <Compile Include="Views\Input\Touchpad\TouchpadTracker.cs" />
+    <Compile Include="Views\Input\BrightnessHotKeyTracker.cs" />
     <Compile Include="Views\Input\MouseAddition.cs" />
     <Compile Include="Views\DevSection.xaml.cs">
       <DependentUpon>DevSection.xaml</DependentUpon>

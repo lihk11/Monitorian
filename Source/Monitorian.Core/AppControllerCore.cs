@@ -14,6 +14,7 @@ using Monitorian.Core.Models.Monitor;
 using Monitorian.Core.Models.Watcher;
 using Monitorian.Core.ViewModels;
 using Monitorian.Core.Views;
+using Monitorian.Core.Views.Input;
 using ScreenFrame;
 using StartupAgency;
 
@@ -40,6 +41,7 @@ public class AppControllerCore
 	private readonly DisplayInformationWatcher _displayInformationWatcher;
 	private readonly BrightnessWatcher _brightnessWatcher;
 	private readonly BrightnessConnector _brightnessConnector;
+	private BrightnessHotKeyTracker _brightnessHotKeyTracker;
 
 	public AppControllerCore(AppKeeper keeper, SettingsCore settings)
 	{
@@ -78,6 +80,9 @@ public class AppControllerCore
 		};
 
 		_current.MainWindow = new MainWindow(this);
+		_brightnessHotKeyTracker = new BrightnessHotKeyTracker(_current.MainWindow);
+		_brightnessHotKeyTracker.DecrementPressed += (_, _) => ReflectBrightnessKey(false);
+		_brightnessHotKeyTracker.IncrementPressed += (_, _) => ReflectBrightnessKey(true);
 
 		if (StartupAgent.IsWindowShowExpected())
 			_current.MainWindow.Show();
@@ -141,6 +146,7 @@ public class AppControllerCore
 
 		NotifyIconContainer.Dispose();
 		WindowPainter.Dispose();
+		_brightnessHotKeyTracker?.Dispose();
 
 		_sessionWatcher.Dispose();
 		_powerWatcher.Dispose();
@@ -516,6 +522,15 @@ public class AppControllerCore
 
 	private void ReflectMouseWheel(int delta)
 	{
+		ReflectBrightness(delta > 0, ViewManager.WheelFactor);
+	}
+
+	private const int SystemBrightnessKeyFactor = 5;
+	private const int SystemBrightnessKeyLowFactor = 2;
+	private const int SystemBrightnessKeyLowThreshold = 15;
+
+	private void ReflectBrightnessKey(bool increments)
+	{
 		var monitor = Monitors.Prepend(SelectedMonitor)
 			.FirstOrDefault(x => x.IsTarget && x.IsControllable);
 		if (monitor is null)
@@ -523,14 +538,39 @@ public class AppControllerCore
 
 		EnsureUnisonWorkable(monitor);
 
-		if (delta > 0)
+		var tickSize = (monitor.Brightness <= SystemBrightnessKeyLowThreshold)
+			? SystemBrightnessKeyLowFactor
+			: SystemBrightnessKeyFactor;
+
+		ReflectBrightness(monitor, increments, tickSize);
+	}
+
+	private void ReflectBrightness(bool increments, int tickSize)
+	{
+		var monitor = Monitors.Prepend(SelectedMonitor)
+			.FirstOrDefault(x => x.IsTarget && x.IsControllable);
+		if (monitor is null)
+			return;
+
+		EnsureUnisonWorkable(monitor);
+		ReflectBrightness(monitor, increments, tickSize);
+	}
+
+	private void ReflectBrightness(MonitorViewModel monitor, bool increments, int tickSize)
+	{
+		if (tickSize <= 0)
+			return;
+
+		if (increments)
 		{
-			monitor.IncrementBrightness(ViewManager.WheelFactor, false);
+			monitor.IncrementBrightness(tickSize, false);
 		}
 		else
 		{
-			monitor.DecrementBrightness(ViewManager.WheelFactor, false);
+			monitor.DecrementBrightness(tickSize, false);
 		}
+
+		ShowMainWindow();
 	}
 
 	protected internal MonitorViewModel SelectedMonitor
